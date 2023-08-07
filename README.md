@@ -4,8 +4,8 @@ A collection of one-off CLI scripts to automate various tasks.
 
 ## Table of Contents
 
-- [Ubuntu Headless Provisioner](#ubuntu-headless-provisioner)
-- [NVM Installer](#nvm-installer)
+- [Ubuntu Headless Provisioner](#provision)
+- [Ubuntu Headless Deprovisioner](#deprovision)
 
 ## Ubuntu Headless Provisioner
 
