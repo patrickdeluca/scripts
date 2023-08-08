@@ -6,7 +6,7 @@ print_title_card() {
     echo "Ubuntu Headless Provisioner"
     echo "Version: 1.0"
     echo "Copyright (C) 2023 by Patrick DeLuca"
-    echo "Description: Installs miniconda, nvm, build-essential, gcc, VSCode server, and Docker on Ubuntu 22.04"
+    echo "Description: Installs miniconda, nvm, build-essential, gcc, VSCode server, Docker, nVidia driver, and Cuda on Ubuntu 22.04"
     echo "Usage Example: ./provision.sh"
     echo "-------------------------"
 }
@@ -57,7 +57,32 @@ main() {
     sudo usermod -aG docker $USER
     newgrp docker
 
-    echo "Installation complete."
+    # Ask user if they want to install nVidia driver and Cuda
+    read -p "Do you want to install nVidia driver and Cuda? [Y/n] " choice
+    case "$choice" in
+      y|Y ) echo "Proceeding with nVidia driver and Cuda installation";;
+      n|N ) echo "Skipping nVidia driver and Cuda installation"; exit 0;;
+      * ) echo "Invalid input. Exiting."; exit 1;;
+    esac
+
+    # Blacklist nouveau driver
+    echo "blacklist nouveau" | sudo tee -a /etc/modprobe.d/blacklist-nvidia-nouveau.conf
+    echo "options nouveau modeset=0" | sudo tee -a /etc/modprobe.d/blacklist-nvidia-nouveau.conf
+    sudo update-initramfs -u
+
+    # Download and install nVidia driver
+    nvidia_driver_url="https://us.download.nvidia.com/tesla/535.86.10/NVIDIA-Linux-x86_64-535.86.10.run"
+    nvidia_driver_file="NVIDIA-Linux-x86_64-535.86.10.run"
+
+    wget $nvidia_driver_url
+    chmod +x $nvidia_driver_file
+    sudo ./$nvidia_driver_file --dkms
+
+    # Install Cuda
+    sudo apt-get install -y nvidia-cuda-toolkit
+
+    echo "Installation complete. The system will now reboot."
+    sudo reboot
 }
 
 main
